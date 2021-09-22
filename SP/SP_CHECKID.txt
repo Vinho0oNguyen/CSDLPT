@@ -1,0 +1,55 @@
+USE [QLDSV]
+GO
+
+/****** Object:  StoredProcedure [dbo].[SP_CHECKID]    Script Date: 9/22/2021 9:24:52 AM ******/
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE PROCEDURE [dbo].[SP_CHECKID] @ID NVARCHAR(15),
+@Type NVARCHAR(15)
+AS
+BEGIN
+	-- LOP
+	IF(@Type = 'MALOP')
+	BEGIN
+		
+		IF EXISTS(SELECT * FROM dbo.LOP WHERE dbo.LOP.MALOP = @ID)
+			RETURN 1; -- Mã tồn tại ở phân mãnh hiện tại
+	
+		ELSE IF EXISTS(SELECT * FROM LINK0.QLDSV.dbo.LOP AS LOP WHERE LOP.MALOP = @ID)
+			RETURN 2;	--Mã tồn tại ở phân mãnh  khác
+	END
+
+	--MON Hoc
+	IF(@Type = 'MAMH')
+	BEGIN
+		IF EXISTS(SELECT * FROM dbo.MONHOC WHERE MAMH = @ID)
+			RETURN 1;
+	END
+	
+	--MON Hoc
+	IF(@Type = 'MALTC')
+	BEGIN
+		IF EXISTS(SELECT * FROM dbo.LOPTINCHI WHERE MAMH = @ID)
+			RETURN 1;
+		ELSE IF EXISTS(SELECT * FROM LINK0.QLDSV.DBO.LOPTINCHI AS LTC WHERE MALTC = @ID)
+			RETURN 2
+	END
+
+
+		IF(@Type = 'MASV')
+	BEGIN
+		
+		IF EXISTS(SELECT * FROM dbo.SINHVIEN WHERE dbo.SINHVIEN.MASV = @ID)
+			RETURN 1; -- Mã tồn tại ở phân mãnh hiện tại
+	
+		ELSE IF EXISTS(SELECT * FROM LINK0.QLDSV.dbo.SINHVIEN AS SV WHERE SV.MASV = @ID)
+			RETURN 2;	--Mã NV tồn tại ở phân mãnh  khác
+	END
+
+	RETURN 0	--Không bị trùng được thêm
+END
+GO
